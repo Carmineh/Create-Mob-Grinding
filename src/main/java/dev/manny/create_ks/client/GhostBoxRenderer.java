@@ -39,10 +39,14 @@ public class GhostBoxRenderer {
             BlockEntity be = player.level().getBlockEntity(pos);
 
             AABB boxToDraw = null;
-            if (be instanceof RotationalMobSpawnerBlockEntity) {
-                boxToDraw = new AABB(pos).inflate(4);
+            if (be instanceof RotationalMobSpawnerBlockEntity spawnerBE) {
+                net.minecraft.core.Direction face = spawnerBE.getSpawnFace();
+                double cx = pos.getX() + 0.5 + face.getStepX() * 1.5;
+                double cy = pos.getY() + 0.5 + face.getStepY() * 1.5;
+                double cz = pos.getZ() + 0.5 + face.getStepZ() * 1.5;
+                boxToDraw = new AABB(cx - 1, cy - 0.5, cz - 1, cx + 1, cy + 0.5, cz + 1);
             } else if (be instanceof RotationalMobGrinderBlockEntity) {
-                boxToDraw = new AABB(pos).inflate(1.5);
+                boxToDraw = new AABB(pos).inflate(0.25);
             }
 
             if (boxToDraw != null) {

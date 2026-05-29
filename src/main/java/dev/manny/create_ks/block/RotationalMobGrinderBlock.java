@@ -1,6 +1,6 @@
 package dev.manny.create_ks.block;
 
-import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
+import com.simibubi.create.content.kinetics.base.KineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import dev.manny.create_ks.block.entity.RotationalMobGrinderBlockEntity;
 import dev.manny.create_ks.registry.ModBlockEntities;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.LevelReader;
 
-public class RotationalMobGrinderBlock extends DirectionalKineticBlock implements IBE<RotationalMobGrinderBlockEntity> {
+public class RotationalMobGrinderBlock extends KineticBlock implements IBE<RotationalMobGrinderBlockEntity> {
 
     public RotationalMobGrinderBlock(Properties properties) {
         super(properties);
@@ -17,12 +17,12 @@ public class RotationalMobGrinderBlock extends DirectionalKineticBlock implement
 
     @Override
     public Direction.Axis getRotationAxis(BlockState state) {
-        return state.getValue(FACING).getAxis();
+        return Direction.Axis.Y;
     }
 
     @Override
     public boolean hasShaftTowards(LevelReader world, net.minecraft.core.BlockPos pos, BlockState state, Direction face) {
-        return face == state.getValue(FACING).getOpposite();
+        return face.getAxis() == Direction.Axis.Y; // Accepts from UP and DOWN
     }
 
     @Override
@@ -63,6 +63,9 @@ public class RotationalMobGrinderBlock extends DirectionalKineticBlock implement
                     net.minecraft.world.item.ItemStack book = grinderBE.extractEnchantments();
                     if (!book.isEmpty()) {
                         net.minecraft.world.level.block.Block.popResource(context.getLevel(), context.getClickedPos(), book);
+                        return net.minecraft.world.InteractionResult.SUCCESS;
+                    } else {
+                        return super.onWrenched(state, context);
                     }
                 }
                 return net.minecraft.world.InteractionResult.SUCCESS;

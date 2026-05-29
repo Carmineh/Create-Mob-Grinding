@@ -23,10 +23,14 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
 
     private ItemStack internalWeapon = new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD);
     private float attackTimer = 0;
-    private static final float ATTACK_THRESHOLD = 2000f;
+    private static final float ATTACK_THRESHOLD = 10000f;
 
     public RotationalMobGrinderBlockEntity(BlockPos pos, BlockState state) {
         super(dev.manny.create_ks.registry.ModBlockEntities.ROTATIONAL_MOB_GRINDER.get(), pos, state);
+    }
+
+    public ItemStack getInternalWeapon() {
+        return internalWeapon;
     }
 
     public boolean applyEnchantedBook(ItemStack book) {
@@ -48,6 +52,7 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
         EnchantmentHelper.setEnchantments(internalWeapon, mutable.toImmutable());
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        if (hasNetwork()) getOrCreateNetwork().updateNetwork();
         return true;
     }
     
@@ -61,8 +66,21 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
         internalWeapon = new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD);
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        if (hasNetwork()) getOrCreateNetwork().updateNetwork();
         
         return book;
+    }
+
+    @Override
+    public float calculateStressApplied() {
+        float impact = super.calculateStressApplied();
+        ItemEnchantments enchants = internalWeapon.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        if (!enchants.isEmpty()) {
+            int totalLevels = enchants.keySet().stream().mapToInt(enchants::getLevel).sum();
+            impact += totalLevels * 4.0f; // Aumenta lo stress in base agli incantesimi
+        }
+        this.lastStressApplied = impact;
+        return impact;
     }
 
     @Override
@@ -84,7 +102,8 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
 
     private void performAttack() {
         ServerLevel serverLevel = (ServerLevel) level;
-        AABB killZone = new AABB(worldPosition).inflate(1.5);
+        // AABB(worldPosition) is 1x1x1. Inflating by 0.25 makes it 1.5x1.5x1.5
+        AABB killZone = new AABB(worldPosition).inflate(0.25);
         List<LivingEntity> targets = serverLevel.getEntitiesOfClass(LivingEntity.class, killZone, e -> !(e instanceof Player) && e.isAlive());
 
         if (targets.isEmpty()) return;
@@ -93,8 +112,20 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
         fakePlayer.setPos(worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5);
         fakePlayer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, internalWeapon);
 
+        ItemEnchantments enchants = internalWeapon.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry = serverLevel.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+        
+        int sharpness = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.SHARPNESS));
+        int smite = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.SMITE));
+        int bane = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.BANE_OF_ARTHROPODS));
+
         for (LivingEntity target : targets) {
-            fakePlayer.attack(target);
+            float damage = 7.0f; // Danno base Spada di Diamante
+            if (sharpness > 0) damage += 0.5f + 0.5f * sharpness;
+            if (smite > 0 && target.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)) damage += 2.5f * smite;
+            if (bane > 0 && target.getType().is(net.minecraft.tags.EntityTypeTags.ARTHROPOD)) damage += 2.5f * bane;
+            
+            target.hurt(serverLevel.damageSources().playerAttack(fakePlayer), damage);
         }
     }
 

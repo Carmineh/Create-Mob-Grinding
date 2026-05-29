@@ -110,7 +110,11 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     // Create Mod Dependency via Modrinth
     implementation "maven.modrinth:create:${project.create_version}"
-    implementation "net.createmod.ponder:Ponder-NeoForge-${project.minecraft_version}:1.0.46"
+    implementation "net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.69"
+    
+    // Jade API
+    compileOnly "maven.modrinth:jade:15.10.5+neoforge"
+    runtimeOnly "maven.modrinth:jade:15.10.5+neoforge"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

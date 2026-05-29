@@ -16,6 +16,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Direction;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
@@ -29,10 +30,58 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
     };
 
     private float spawnProgress = 0;
-    private static final float SPAWN_THRESHOLD = 5000f; // Configurable later
+    public static final float SPAWN_THRESHOLD = 5000f; // Configurable later
+    private Direction spawnFace = null;
+
+    // Client-side rendering cache
+    private Entity renderEntity = null;
 
     public RotationalMobSpawnerBlockEntity(BlockPos pos, BlockState state) {
         super(dev.manny.create_ks.registry.ModBlockEntities.ROTATIONAL_MOB_SPAWNER.get(), pos, state);
+    }
+
+    public Direction getSpawnFace() {
+        if (spawnFace == null) {
+            return getBlockState().getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING);
+        }
+        return spawnFace;
+    }
+
+    public void cycleSpawnFace() {
+        Direction current = getSpawnFace();
+        Direction[] dirs = Direction.values();
+        int nextIdx = (current.ordinal() + 1) % dirs.length;
+        this.spawnFace = dirs[nextIdx];
+        setChanged();
+        if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+    
+    public float getSpawnProgress() {
+        return spawnProgress;
+    }
+
+    public Entity getRenderEntity() {
+        if (level == null || !level.isClientSide) return null;
+        ItemStack spawnerChunk = inventory.getStackInSlot(0);
+        if (spawnerChunk.isEmpty()) {
+            renderEntity = null;
+            return null;
+        }
+        ResourceLocation entityLoc = spawnerChunk.get(dev.manny.create_ks.registry.ModDataComponents.SPAWNER_ENTITY.get());
+        if (entityLoc == null) {
+            renderEntity = null;
+            return null;
+        }
+        
+        if (renderEntity == null || !BuiltInRegistries.ENTITY_TYPE.getKey(renderEntity.getType()).equals(entityLoc)) {
+            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(entityLoc);
+            if (type != null) {
+                renderEntity = type.create(level);
+            } else {
+                renderEntity = null;
+            }
+        }
+        return renderEntity;
     }
 
     @Override
@@ -69,9 +118,9 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
                 return; // Cap reached
             }
 
-            double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 2;
-            double y = worldPosition.getY() + 1;
-            double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 2;
+            double x = worldPosition.getX() + 0.5 + getSpawnFace().getStepX() * 1.5 + (level.random.nextDouble() - 0.5) * 2;
+            double y = worldPosition.getY() + 0.5 + getSpawnFace().getStepY() * 1.5;
+            double z = worldPosition.getZ() + 0.5 + getSpawnFace().getStepZ() * 1.5 + (level.random.nextDouble() - 0.5) * 2;
 
             Entity entity = type.create(serverLevel);
             if (entity instanceof Mob mob) {
@@ -90,6 +139,9 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
             inventory.deserializeNBT(registries, compound.getCompound("Inventory"));
         }
         spawnProgress = compound.getFloat("SpawnProgress");
+        if (compound.contains("SpawnFace")) {
+            spawnFace = Direction.byName(compound.getString("SpawnFace"));
+        }
     }
 
     @Override
@@ -97,5 +149,8 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
         super.write(compound, registries, clientPacket);
         compound.put("Inventory", inventory.serializeNBT(registries));
         compound.putFloat("SpawnProgress", spawnProgress);
+        if (spawnFace != null) {
+            compound.putString("SpawnFace", spawnFace.getName());
+        }
     }
 }

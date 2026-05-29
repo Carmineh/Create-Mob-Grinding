@@ -3,6 +3,7 @@ package dev.manny.create_ks;
 import com.mojang.logging.LogUtils;
 import dev.manny.create_ks.registry.ModBlockEntities;
 import dev.manny.create_ks.registry.ModBlocks;
+import dev.manny.create_ks.registry.ModCreativeTabs;
 import dev.manny.create_ks.registry.ModDataComponents;
 import dev.manny.create_ks.registry.ModItems;
 import net.neoforged.bus.api.IEventBus;
@@ -19,5 +20,6 @@ public class CreateKineticSpawning {
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
     }
 }

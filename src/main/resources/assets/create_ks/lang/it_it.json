@@ -1,0 +1,16 @@
+{
+  "itemGroup.create_ks.kinetic_spawning_tab": "Create: Kinetic Spawning",
+  
+  "block.create_ks.rotational_mob_spawner": "Mob Spawner Rotazionale",
+  "block.create_ks.rotational_mob_grinder": "Mob Grinder Rotazionale",
+  
+  "item.create_ks.mob_spawner_chunk": "Frammento di Mob Spawner",
+  "item.create_ks.rotational_mob_spawner": "Mob Spawner Rotazionale",
+  "item.create_ks.rotational_mob_grinder": "Mob Grinder Rotazionale",
+  
+  "tooltip.create_ks.mob_chunk.entity_type": "Entità: %s",
+  
+  "jade.create_ks.spawner.progress": "Progresso Spawn: %s%%",
+  "jade.create_ks.grinder.shift_for_enchants": "Premi Shift per gli incantesimi",
+  "jade.create_ks.grinder.no_enchants": "Nessun Incantesimo"
+}

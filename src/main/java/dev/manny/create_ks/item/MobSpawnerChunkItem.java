@@ -19,9 +19,7 @@ public class MobSpawnerChunkItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         ResourceLocation entityId = stack.get(ModDataComponents.SPAWNER_ENTITY.get());
         if (entityId != null) {
-            tooltipComponents.add(Component.translatable("create_ks.tooltip.spawner_chunk.entity", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityId))).withStyle(net.minecraft.ChatFormatting.GRAY));
-        } else {
-            tooltipComponents.add(Component.translatable("create_ks.tooltip.spawner_chunk.empty").withStyle(net.minecraft.ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.create_ks.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityId))).withStyle(net.minecraft.ChatFormatting.GRAY));
         }
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
