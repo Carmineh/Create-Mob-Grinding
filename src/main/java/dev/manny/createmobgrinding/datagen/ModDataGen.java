@@ -1,7 +1,6 @@
 package dev.manny.createmobgrinding.datagen;
 
 import dev.manny.createmobgrinding.CreateMobGrinding;
-import dev.manny.createmobgrinding.event.SpawnerBreakEventHandler;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -35,10 +34,7 @@ public class ModDataGen {
 
         @Override
         protected void addTags(HolderLookup.Provider pProvider) {
-            this.tag(SpawnerBreakEventHandler.BLACKLISTED_SPAWNERS)
-                    .add(EntityType.ENDER_DRAGON)
-                    .add(EntityType.WITHER)
-                    .add(EntityType.WARDEN);
+            // No custom entity tags generated via code
         }
     }
 }
