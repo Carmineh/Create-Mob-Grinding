@@ -133,9 +133,14 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
                 return; // Cap reached
             }
 
-            double x = worldPosition.getX() + (level.random.nextDouble() - level.random.nextDouble()) * 1.5D + 0.5D;
+            // 3x3 around the spawner, excluding the center column
+            int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
+            int[] dz = {-1, 0, 1, -1, 1, -1, 0, 1};
+            int r = level.random.nextInt(8);
+            
+            double x = worldPosition.getX() + dx[r] + 0.5D;
             double y = worldPosition.getY() + level.random.nextInt(3) - 1;
-            double z = worldPosition.getZ() + (level.random.nextDouble() - level.random.nextDouble()) * 1.5D + 0.5D;
+            double z = worldPosition.getZ() + dz[r] + 0.5D;
 
             Entity entity = type.create(serverLevel);
             if (entity instanceof Mob mob) {
@@ -158,11 +163,12 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        boolean added = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
         
         ItemStack chunk = inventory.getStackInSlot(0);
         if (chunk.isEmpty()) {
             tooltip.add(Component.literal("    ").append(Component.translatable("tooltip.createmobgrinding.spawner.no_chunk")).withStyle(net.minecraft.ChatFormatting.RED));
+            return true;
         } else {
             ResourceLocation entityLoc = chunk.get(dev.manny.createmobgrinding.registry.ModDataComponents.SPAWNER_ENTITY.get());
             if (entityLoc != null) {
@@ -170,9 +176,12 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
                 double threshold = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBaseProgress.get() * getTier();
                 int percentage = (int) ((spawnProgress / threshold) * 100);
                 tooltip.add(Component.literal("    ").append(Component.translatable("jade.createmobgrinding.spawner.progress", percentage)).withStyle(net.minecraft.ChatFormatting.YELLOW));
+                return true;
+            } else {
+                tooltip.add(Component.literal("    ").append(Component.literal("Invalid/Empty Chunk")).withStyle(net.minecraft.ChatFormatting.RED));
+                return true;
             }
         }
-        return true;
     }
 
     @Override
