@@ -1,6 +1,16 @@
-# Create: Mob Grinding
+<div align="center">
+  <img src=".idea/icon.png" width="300"/>
+
+  # Create: Mob Grinding
+  
+  [![NeoForge](https://img.shields.io/badge/NeoForge-1.21.1-orange.svg)](https://neoforged.net/)
+	<a href="https://www.curseforge.com/minecraft/mc-mods/create-mob-grinding"><img src="https://img.shields.io/curseforge/dt/1557641?logo=curseforge&label=&suffix=%20&style=flat&color=242629&labelColor=F16436&logoColor=1C1C1C" alt="CurseForge"></a>
+  [![Modrinth](https://img.shields.io/badge/Modrinth-Pending-1bd96a.svg)](#)
+</div>
 
 An addon for the **Create** mod that brings a kinetic way to spawn and grind mobs in Minecraft! Extract souls from Vanilla spawners and utilize rotational force to power your very own customizable mob farms.
+
+---
 
 ## ⚙️ Features
 
