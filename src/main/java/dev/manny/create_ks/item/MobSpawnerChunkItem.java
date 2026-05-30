@@ -23,4 +23,9 @@ public class MobSpawnerChunkItem extends Item {
         }
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return true;
+    }
 }
