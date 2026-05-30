@@ -58,9 +58,9 @@ public class RotationalMobSpawnerBlock extends DirectionalKineticBlock implement
 
     @Override
     public net.minecraft.world.InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
-        net.minecraft.world.level.block.entity.BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
-        if (be instanceof RotationalMobSpawnerBlockEntity spawnerBE) {
-            if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) {
+        if (context.getPlayer() != null && !context.getPlayer().isShiftKeyDown()) {
+            net.minecraft.world.level.block.entity.BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
+            if (be instanceof RotationalMobSpawnerBlockEntity spawnerBE) {
                 net.minecraft.world.item.ItemStack chunk = spawnerBE.inventory.getStackInSlot(0);
                 if (!chunk.isEmpty()) {
                     if (!context.getLevel().isClientSide) {
@@ -68,22 +68,35 @@ public class RotationalMobSpawnerBlock extends DirectionalKineticBlock implement
                         spawnerBE.inventory.setStackInSlot(0, net.minecraft.world.item.ItemStack.EMPTY);
                     }
                     return net.minecraft.world.InteractionResult.SUCCESS;
-                } else {
-                    // Se è vuoto, delega al super (che rompe il blocco e lo droppa per Create)
-                    return super.onWrenched(state, context);
                 }
-            } else {
-                // Non in shift: ruota la faccia di spawn
-                if (!context.getLevel().isClientSide) {
-                    spawnerBE.cycleSpawnFace();
-                    if (context.getPlayer() != null) {
-                        context.getPlayer().displayClientMessage(net.minecraft.network.chat.Component.literal("Spawn Face: " + spawnerBE.getSpawnFace().getName()), true);
-                    }
-                }
-                return net.minecraft.world.InteractionResult.SUCCESS;
             }
         }
         return super.onWrenched(state, context);
+    }
+
+    @Override
+    public net.minecraft.world.InteractionResult onSneakWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
+        net.minecraft.world.level.Level level = context.getLevel();
+        net.minecraft.core.BlockPos pos = context.getClickedPos();
+        if (!level.isClientSide) {
+            level.destroyBlock(pos, false);
+            net.minecraft.world.level.block.Block.popResource(level, pos, new net.minecraft.world.item.ItemStack(dev.manny.createmobgrinding.registry.ModBlocks.ROTATIONAL_MOB_SPAWNER.get().asItem()));
+        }
+        return net.minecraft.world.InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void onRemove(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof RotationalMobSpawnerBlockEntity spawnerBE) {
+                net.minecraft.world.item.ItemStack chunk = spawnerBE.inventory.getStackInSlot(0);
+                if (!chunk.isEmpty()) {
+                    net.minecraft.world.level.block.Block.popResource(level, pos, chunk);
+                }
+            }
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
     }
 }
 

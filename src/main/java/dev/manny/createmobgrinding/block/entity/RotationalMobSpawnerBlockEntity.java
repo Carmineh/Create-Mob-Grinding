@@ -18,6 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.Direction;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import com.simibubi.create.foundation.utility.CreateLang;
+import net.minecraft.network.chat.Component;
+import java.util.List;
 
 public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
 
@@ -25,13 +28,12 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
+            updateSpeed = true;
             if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     };
 
     private float spawnProgress = 0;
-    public static final float SPAWN_THRESHOLD = 5000f; // Configurable later
-    private Direction spawnFace = null;
 
     // Client-side rendering cache
     private Entity renderEntity = null;
@@ -40,22 +42,6 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
         super(dev.manny.createmobgrinding.registry.ModBlockEntities.ROTATIONAL_MOB_SPAWNER.get(), pos, state);
     }
 
-    public Direction getSpawnFace() {
-        if (spawnFace == null) {
-            return getBlockState().getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING);
-        }
-        return spawnFace;
-    }
-
-    public void cycleSpawnFace() {
-        Direction current = getSpawnFace();
-        Direction[] dirs = Direction.values();
-        int nextIdx = (current.ordinal() + 1) % dirs.length;
-        this.spawnFace = dirs[nextIdx];
-        setChanged();
-        if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-    }
-    
     public float getSpawnProgress() {
         return spawnProgress;
     }
@@ -84,6 +70,30 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
         return renderEntity;
     }
 
+    public int getTier() {
+        ItemStack chunk = inventory.getStackInSlot(0);
+        if (chunk.isEmpty()) return 1;
+        ResourceLocation entityLoc = chunk.get(dev.manny.createmobgrinding.registry.ModDataComponents.SPAWNER_ENTITY.get());
+        if (entityLoc == null) return 1;
+        
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(entityLoc);
+        if (type == null) return 1;
+        
+        if (type.is(dev.manny.createmobgrinding.registry.ModTags.TIER_5)) return 5;
+        if (type.is(dev.manny.createmobgrinding.registry.ModTags.TIER_4)) return 4;
+        if (type.is(dev.manny.createmobgrinding.registry.ModTags.TIER_3)) return 3;
+        if (type.is(dev.manny.createmobgrinding.registry.ModTags.TIER_2)) return 2;
+        return 1;
+    }
+
+    @Override
+    public float calculateStressApplied() {
+        float baseImpact = super.calculateStressApplied();
+        float calculated = baseImpact * getTier();
+        this.lastStressApplied = calculated;
+        return calculated;
+    }
+
     @Override
     public void tick() {
         super.tick();
@@ -98,11 +108,16 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
 
         ResourceLocation entityLoc = spawnerChunk.get(dev.manny.createmobgrinding.registry.ModDataComponents.SPAWNER_ENTITY.get());
         if (entityLoc == null) return;
+        
+        List<? extends String> blacklist = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBlacklist.get();
+        if (blacklist.contains(entityLoc.toString())) return;
 
         spawnProgress += speed;
 
-        if (spawnProgress >= SPAWN_THRESHOLD) {
-            spawnProgress -= SPAWN_THRESHOLD;
+        double threshold = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBaseProgress.get() * getTier();
+
+        if (spawnProgress >= threshold) {
+            spawnProgress -= threshold;
             spawnMob(entityLoc);
         }
     }
@@ -118,9 +133,9 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
                 return; // Cap reached
             }
 
-            double x = worldPosition.getX() + 0.5 + getSpawnFace().getStepX() * 1.5 + (level.random.nextDouble() - 0.5) * 2;
-            double y = worldPosition.getY() + 0.5 + getSpawnFace().getStepY() * 1.5;
-            double z = worldPosition.getZ() + 0.5 + getSpawnFace().getStepZ() * 1.5 + (level.random.nextDouble() - 0.5) * 2;
+            double x = worldPosition.getX() + (level.random.nextDouble() - level.random.nextDouble()) * 1.5D + 0.5D;
+            double y = worldPosition.getY() + level.random.nextInt(3) - 1;
+            double z = worldPosition.getZ() + (level.random.nextDouble() - level.random.nextDouble()) * 1.5D + 0.5D;
 
             Entity entity = type.create(serverLevel);
             if (entity instanceof Mob mob) {
@@ -139,19 +154,32 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
             inventory.deserializeNBT(registries, compound.getCompound("Inventory"));
         }
         spawnProgress = compound.getFloat("SpawnProgress");
-        if (compound.contains("SpawnFace")) {
-            spawnFace = Direction.byName(compound.getString("SpawnFace"));
-        }
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
-        compound.put("Inventory", inventory.serializeNBT(registries));
-        compound.putFloat("SpawnProgress", spawnProgress);
-        if (spawnFace != null) {
-            compound.putString("SpawnFace", spawnFace.getName());
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        
+        ItemStack chunk = inventory.getStackInSlot(0);
+        if (chunk.isEmpty()) {
+            tooltip.add(Component.literal("    ").append(Component.translatable("tooltip.createmobgrinding.spawner.no_chunk")).withStyle(net.minecraft.ChatFormatting.RED));
+        } else {
+            ResourceLocation entityLoc = chunk.get(dev.manny.createmobgrinding.registry.ModDataComponents.SPAWNER_ENTITY.get());
+            if (entityLoc != null) {
+                tooltip.add(Component.literal("    ").append(Component.translatable("tooltip.createmobgrinding.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityLoc)))).withStyle(net.minecraft.ChatFormatting.GRAY));
+                double threshold = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBaseProgress.get() * getTier();
+                int percentage = (int) ((spawnProgress / threshold) * 100);
+                tooltip.add(Component.literal("    ").append(Component.translatable("jade.createmobgrinding.spawner.progress", percentage)).withStyle(net.minecraft.ChatFormatting.YELLOW));
+            }
         }
+        return true;
+    }
+
+    @Override
+    protected void write(CompoundTag compound, HolderLookup.Provider provider, boolean clientPacket) {
+        super.write(compound, provider, clientPacket);
+        compound.put("Inventory", inventory.serializeNBT(provider));
+        compound.putFloat("SpawnProgress", spawnProgress);
+        compound.putFloat("MaxSpawnProgress", (float)(dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBaseProgress.get() * getTier()));
     }
 }
-

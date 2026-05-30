@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "BCB",
+    " B "
+  ],
+  "key": {
+    "C": {
+      "item": "create:brass_casing"
+    },
+    "B": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "result": {
+    "id": "createmobgrinding:rotational_mob_spawner",
+    "count": 1
+  },
+  "category": "misc"
+}

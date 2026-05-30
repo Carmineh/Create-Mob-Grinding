@@ -18,16 +18,13 @@ public enum SpawnerComponentProvider implements IBlockComponentProvider, IServer
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        if (accessor.getBlockEntity() instanceof RotationalMobSpawnerBlockEntity spawnerBE) {
+        if (accessor.getBlockEntity() instanceof RotationalMobSpawnerBlockEntity spawner) {
             CompoundTag serverData = accessor.getServerData();
-            if (serverData.contains("SpawnProgress")) {
-                float progress = serverData.getFloat("SpawnProgress");
-                float max = RotationalMobSpawnerBlockEntity.SPAWN_THRESHOLD;
-                int percentage = (int) ((progress / max) * 100);
-                
-                tooltip.add(Component.translatable("jade.createmobgrinding.spawner.progress", percentage));
+            if (serverData.contains("SpawnProgress") && serverData.contains("MaxSpawnProgress")) {
+                float spawnProgress = serverData.getFloat("SpawnProgress");
+                float max = serverData.getFloat("MaxSpawnProgress");
+                tooltip.add(Component.translatable("jade.createmobgrinding.spawner.progress", (int) ((spawnProgress / Math.max(1, max)) * 100)));
             }
-            
             if (serverData.contains("SpawnerEntity")) {
                 ResourceLocation entityId = ResourceLocation.parse(serverData.getString("SpawnerEntity"));
                 tooltip.add(Component.translatable("tooltip.createmobgrinding.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityId))).withStyle(net.minecraft.ChatFormatting.GRAY));

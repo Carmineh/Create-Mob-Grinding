@@ -1,0 +1,16 @@
+{
+  "type": "create:item_application",
+  "ingredients": [
+    {
+      "item": "minecraft:spawner"
+    },
+    {
+      "item": "create:brass_casing"
+    }
+  ],
+  "results": [
+    {
+      "id": "createmobgrinding:rotational_mob_spawner"
+    }
+  ]
+}

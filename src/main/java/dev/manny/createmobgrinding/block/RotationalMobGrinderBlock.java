@@ -55,23 +55,28 @@ public class RotationalMobGrinderBlock extends KineticBlock implements IBE<Rotat
     }
 
     @Override
-    public net.minecraft.world.InteractionResult onWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
-        if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) {
-            net.minecraft.world.level.block.entity.BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
-            if (be instanceof RotationalMobGrinderBlockEntity grinderBE) {
-                if (!context.getLevel().isClientSide) {
-                    net.minecraft.world.item.ItemStack book = grinderBE.extractEnchantments();
-                    if (!book.isEmpty()) {
-                        net.minecraft.world.level.block.Block.popResource(context.getLevel(), context.getClickedPos(), book);
-                        return net.minecraft.world.InteractionResult.SUCCESS;
-                    } else {
-                        return super.onWrenched(state, context);
-                    }
-                }
-                return net.minecraft.world.InteractionResult.SUCCESS;
-            }
+    public net.minecraft.world.InteractionResult onSneakWrenched(BlockState state, net.minecraft.world.item.context.UseOnContext context) {
+        net.minecraft.world.level.Level level = context.getLevel();
+        net.minecraft.core.BlockPos pos = context.getClickedPos();
+        if (!level.isClientSide) {
+            level.destroyBlock(pos, false);
+            net.minecraft.world.level.block.Block.popResource(level, pos, new net.minecraft.world.item.ItemStack(dev.manny.createmobgrinding.registry.ModBlocks.ROTATIONAL_MOB_GRINDER.get().asItem()));
         }
-        return super.onWrenched(state, context);
+        return net.minecraft.world.InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void onRemove(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock())) {
+            net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof RotationalMobGrinderBlockEntity grinderBE) {
+                net.minecraft.world.item.ItemStack book = grinderBE.extractEnchantments();
+                if (!book.isEmpty()) {
+                    net.minecraft.world.level.block.Block.popResource(level, pos, book);
+                }
+            }
+            super.onRemove(state, level, pos, newState, isMoving);
+        }
     }
 }
 

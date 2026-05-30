@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:enderman",
+    "minecraft:blaze",
+    "minecraft:ghast",
+    "minecraft:magma_cube"
+  ]
+}

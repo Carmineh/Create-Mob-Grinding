@@ -18,6 +18,8 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.List;
+import com.simibubi.create.foundation.utility.CreateLang;
+import net.minecraft.network.chat.Component;
 
 public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
 
@@ -41,13 +43,30 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
         
         ItemEnchantments existingEnchants = internalWeapon.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(existingEnchants);
+        boolean appliedAny = false;
         
-        bookEnchants.keySet().forEach(ench -> {
-            int current = mutable.getLevel(ench);
-            int added = bookEnchants.getLevel(ench);
-            if (current == added) mutable.set(ench, current + 1);
-            else mutable.set(ench, Math.max(current, added));
-        });
+        for (var ench : bookEnchants.keySet()) {
+            net.minecraft.resources.ResourceLocation loc = ench.unwrapKey().get().location();
+            if (loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("sharpness")) ||
+                loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("looting")) ||
+                loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("fire_aspect"))) {
+                
+                int current = mutable.getLevel(ench);
+                int added = bookEnchants.getLevel(ench);
+                int vanillaMax = ench.value().getMaxLevel();
+                
+                int newLevel;
+                if (current == added) newLevel = Math.min(vanillaMax, current + 1);
+                else newLevel = Math.min(vanillaMax, Math.max(current, added));
+                
+                if (newLevel > current) {
+                    mutable.set(ench, newLevel);
+                    appliedAny = true;
+                }
+            }
+        }
+        
+        if (!appliedAny) return false;
         
         EnchantmentHelper.setEnchantments(internalWeapon, mutable.toImmutable());
         setChanged();
@@ -127,6 +146,21 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
             
             target.hurt(serverLevel.damageSources().playerAttack(fakePlayer), damage);
         }
+    }
+
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        
+        ItemEnchantments enchants = internalWeapon.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        if (enchants.isEmpty()) {
+            tooltip.add(Component.literal("    ").append(Component.translatable("jade.createmobgrinding.grinder.no_enchants")).withStyle(net.minecraft.ChatFormatting.GRAY));
+        } else {
+            enchants.keySet().forEach(ench -> {
+                tooltip.add(Component.literal("    ").append(Component.translatable(ench.unwrapKey().get().location().toLanguageKey("enchantment")).append(" " + enchants.getLevel(ench))).withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+            });
+        }
+        return true;
     }
 
     @Override

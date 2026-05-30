@@ -15,7 +15,8 @@ public class CreateMobGrinding {
     public static final String MOD_ID = "createmobgrinding";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public CreateMobGrinding(IEventBus modEventBus) {
+    public CreateMobGrinding(IEventBus modEventBus, net.neoforged.fml.ModContainer modContainer) {
+        dev.manny.createmobgrinding.config.ModConfigs.register(modContainer);
         ModDataComponents.COMPONENTS.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
