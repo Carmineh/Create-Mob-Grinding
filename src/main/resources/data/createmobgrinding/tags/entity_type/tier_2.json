@@ -4,6 +4,7 @@
     "minecraft:zombie",
     "minecraft:skeleton",
     "minecraft:spider",
-    "minecraft:creeper"
+    "minecraft:creeper",
+    "minecraft:piglin"
   ]
 }

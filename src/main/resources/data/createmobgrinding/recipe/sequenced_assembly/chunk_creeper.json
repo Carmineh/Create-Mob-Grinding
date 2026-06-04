@@ -6,14 +6,14 @@
   "loops": 5,
   "results": [
     {
-      "chance": 80.0,
+      "chance": 90.0,
       "id": "createmobgrinding:mob_spawner_chunk",
       "components": {
         "createmobgrinding:spawner_entity": "minecraft:creeper"
       }
     },
     {
-      "chance": 20.0,
+      "chance": 10.0,
       "id": "createmobgrinding:unfinished_spawner_chunk"
     }
   ],

@@ -6,15 +6,11 @@
   "loops": 5,
   "results": [
     {
-      "chance": 20.0,
+      "chance": 100.0,
       "id": "createmobgrinding:mob_spawner_chunk",
       "components": {
-        "createmobgrinding:spawner_entity": "minecraft:wither"
+        "createmobgrinding:spawner_entity": "minecraft:chicken"
       }
-    },
-    {
-      "chance": 80.0,
-      "id": "createmobgrinding:unfinished_spawner_chunk"
     }
   ],
   "sequence": [
@@ -25,7 +21,7 @@
           "item": "createmobgrinding:unfinished_spawner_chunk"
         },
         {
-          "item": "minecraft:nether_star"
+          "item": "minecraft:chicken"
         }
       ],
       "results": [
@@ -41,7 +37,7 @@
           "item": "createmobgrinding:unfinished_spawner_chunk"
         },
         {
-          "item": "create:experience_block"
+          "item": "create:experience_nugget"
         }
       ],
       "results": [
