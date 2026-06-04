@@ -1,6 +1,6 @@
 package dev.manny.createmobgrinding.block;
 
-import com.simibubi.create.content.kinetics.base.KineticBlock;
+import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import dev.manny.createmobgrinding.block.entity.RotationalMobGrinderBlockEntity;
 import dev.manny.createmobgrinding.registry.ModBlockEntities;
@@ -9,20 +9,31 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.LevelReader;
 
-public class RotationalMobGrinderBlock extends KineticBlock implements IBE<RotationalMobGrinderBlockEntity> {
+public class RotationalMobGrinderBlock extends DirectionalKineticBlock implements IBE<RotationalMobGrinderBlockEntity> {
 
     public RotationalMobGrinderBlock(Properties properties) {
         super(properties);
     }
 
     @Override
+    public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+        Direction preferred = this.getPreferredFacing(context);
+        if (preferred == null || (context.getPlayer() != null && context.getPlayer().isShiftKeyDown())) {
+            Direction dir = context.getNearestLookingDirection();
+            // Point the grinder AWAY from the player (direction they are looking)
+            return this.defaultBlockState().setValue(FACING, dir);
+        }
+        return this.defaultBlockState().setValue(FACING, preferred);
+    }
+
+    @Override
     public Direction.Axis getRotationAxis(BlockState state) {
-        return Direction.Axis.Y;
+        return state.getValue(FACING).getAxis();
     }
 
     @Override
     public boolean hasShaftTowards(LevelReader world, net.minecraft.core.BlockPos pos, BlockState state, Direction face) {
-        return face.getAxis() == Direction.Axis.Y; // Accepts from UP and DOWN
+        return face == state.getValue(FACING).getOpposite();
     }
 
     @Override

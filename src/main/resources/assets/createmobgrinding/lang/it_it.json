@@ -11,5 +11,6 @@
   "jade.createmobgrinding.grinder.no_enchants": "Nessun Incantesimo",
   "tooltip.createmobgrinding.spawner.no_chunk": "Mob Spawner Chunk Mancante",
   "jei.createmobgrinding.spawner_extraction": "Estrazione Chunk",
-  "jei.createmobgrinding.spawner_conversion": "Conversione Spawner"
+  "jei.createmobgrinding.spawner_conversion": "Conversione Spawner",
+  "enchantment.createmobgrinding.beheading": "Decapitazione"
 }

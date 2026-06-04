@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class RotationalMobGrinderRenderer extends KineticBlockEntityRenderer<RotationalMobGrinderBlockEntity> {
 
@@ -20,8 +21,7 @@ public class RotationalMobGrinderRenderer extends KineticBlockEntityRenderer<Rot
 
     @Override
     protected void renderSafe(RotationalMobGrinderBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        // Render base kinetic model (the default shaft)
-        super.renderSafe(be, partialTicks, ms, buffer, light, overlay);
+
 
         // Fetch our custom blade model registered in ModClientEvents
         BakedModel bladeModel = Minecraft.getInstance().getModelManager().getModel(
@@ -30,17 +30,44 @@ public class RotationalMobGrinderRenderer extends KineticBlockEntityRenderer<Rot
 
         ms.pushPose();
 
-        float speed = Math.abs(be.getSpeed());
-        float angle;
-        if (speed > 0) {
-            angle = (be.getLevel().getGameTime() + partialTicks) * (speed / 10f);
+        // Determine block orientation
+        Direction facing = be.getBlockState().hasProperty(BlockStateProperties.FACING) ? 
+                           be.getBlockState().getValue(BlockStateProperties.FACING) : 
+                           Direction.NORTH;
+
+        float angle = 0f;
+        try {
+            Direction.Axis axis = be.getBlockState().hasProperty(BlockStateProperties.FACING) ? 
+                                  be.getBlockState().getValue(BlockStateProperties.FACING).getAxis() : 
+                                  Direction.Axis.Z;
+            float time = be.getLevel().getGameTime() + partialTicks;
+            float offset = com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer.getRotationOffsetForPosition(be, be.getBlockPos(), axis);
+            angle = ((time * be.getSpeed() * 3f / 10f) + offset) % 360;
+        } catch (Exception e) {}
+
+        ms.translate(0.5D, 0.5D, 0.5D);
+
+        // Rotate the entire blade assembly to face the block's front direction
+        // Align blade to face the correct direction
+        float yRot = 0;
+        switch (facing) {
+            case NORTH: yRot = 0f; break;
+            case EAST:  yRot = 270f; break;
+            case SOUTH: yRot = 180f; break;
+            case WEST:  yRot = 90f; break;
+            default: break;
+        }
+        if (facing.getAxis().isVertical()) {
+            // Handle UP/DOWN
+            float xRot = facing == Direction.UP ? 90f : (facing == Direction.DOWN ? -90f : 0f);
+            ms.mulPose(com.mojang.math.Axis.XP.rotationDegrees(xRot));
         } else {
-            angle = 0;
+            ms.mulPose(com.mojang.math.Axis.YP.rotationDegrees(yRot));
         }
 
-        // Rotate the blade around the center Y axis
-        ms.translate(0.5D, 0.5D, 0.5D);
-        ms.mulPose(com.mojang.math.Axis.YP.rotationDegrees(angle));
+        // Spin the blade around the Z axis (which is now the forward axis after Y rotation)
+        ms.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(angle));
+
         ms.translate(-0.5D, -0.5D, -0.5D);
 
         // Render the BakedModel

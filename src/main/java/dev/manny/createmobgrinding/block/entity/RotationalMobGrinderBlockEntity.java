@@ -49,7 +49,8 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
             net.minecraft.resources.ResourceLocation loc = ench.unwrapKey().get().location();
             if (loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("sharpness")) ||
                 loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("looting")) ||
-                loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("fire_aspect"))) {
+                loc.equals(net.minecraft.resources.ResourceLocation.withDefaultNamespace("fire_aspect")) ||
+                loc.equals(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(dev.manny.createmobgrinding.CreateMobGrinding.MOD_ID, "beheading"))) {
                 
                 int current = mutable.getLevel(ench);
                 int added = bookEnchants.getLevel(ench);
@@ -121,8 +122,15 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
 
     private void performAttack() {
         ServerLevel serverLevel = (ServerLevel) level;
-        // AABB(worldPosition) is 1x1x1. Inflating by 0.25 makes it 1.5x1.5x1.5
-        AABB killZone = new AABB(worldPosition).inflate(0.25);
+        
+        net.minecraft.core.Direction facing = getBlockState().hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING) ? 
+                getBlockState().getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING) : 
+                net.minecraft.core.Direction.NORTH;
+                
+        BlockPos targetPos = worldPosition.relative(facing);
+        // Nessun inflate, area perfettamente di 1 blocco (1x1x1) sulla lama
+        AABB killZone = new AABB(targetPos);
+
         List<LivingEntity> targets = serverLevel.getEntitiesOfClass(LivingEntity.class, killZone, e -> !(e instanceof Player) && e.isAlive());
 
         if (targets.isEmpty()) return;
@@ -137,12 +145,17 @@ public class RotationalMobGrinderBlockEntity extends KineticBlockEntity {
         int sharpness = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.SHARPNESS));
         int smite = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.SMITE));
         int bane = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.BANE_OF_ARTHROPODS));
+        int fireAspect = enchants.getLevel(registry.getHolderOrThrow(net.minecraft.world.item.enchantment.Enchantments.FIRE_ASPECT));
 
         for (LivingEntity target : targets) {
-            float damage = 7.0f; // Danno base Spada di Diamante
+            float damage = 2.0f; // Danno base nerfato (era 7.0f)
             if (sharpness > 0) damage += 0.5f + 0.5f * sharpness;
             if (smite > 0 && target.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)) damage += 2.5f * smite;
             if (bane > 0 && target.getType().is(net.minecraft.tags.EntityTypeTags.ARTHROPOD)) damage += 2.5f * bane;
+            
+            if (fireAspect > 0) {
+                target.igniteForSeconds(fireAspect * 4); // igniteForSeconds in 1.21
+            }
             
             target.hurt(serverLevel.damageSources().playerAttack(fakePlayer), damage);
         }

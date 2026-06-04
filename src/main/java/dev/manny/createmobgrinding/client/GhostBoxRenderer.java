@@ -42,7 +42,10 @@ public class GhostBoxRenderer {
             if (be instanceof RotationalMobSpawnerBlockEntity) {
                 boxToDraw = new AABB(pos).inflate(1.0, 1.0, 1.0);
             } else if (be instanceof RotationalMobGrinderBlockEntity) {
-                boxToDraw = new AABB(pos).inflate(0.25);
+                net.minecraft.core.Direction facing = be.getBlockState().hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING) ? 
+                        be.getBlockState().getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING) : 
+                        net.minecraft.core.Direction.NORTH;
+                boxToDraw = new AABB(pos.relative(facing));
             }
 
             if (boxToDraw != null) {
