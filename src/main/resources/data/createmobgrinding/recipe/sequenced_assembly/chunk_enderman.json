@@ -1,0 +1,70 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "createmobgrinding:blank_spawner_chunk"
+  },
+  "loops": 5,
+  "results": [
+    {
+      "chance": 80.0,
+      "id": "createmobgrinding:mob_spawner_chunk",
+      "components": {
+        "createmobgrinding:spawner_entity": "minecraft:enderman"
+      }
+    },
+    {
+      "chance": 20.0,
+      "id": "createmobgrinding:unfinished_spawner_chunk"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createmobgrinding:unfinished_spawner_chunk"
+        },
+        {
+          "item": "minecraft:ender_pearl"
+        }
+      ],
+      "results": [
+        {
+          "id": "createmobgrinding:unfinished_spawner_chunk"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "createmobgrinding:unfinished_spawner_chunk"
+        },
+        {
+          "item": "create:experience_block"
+        }
+      ],
+      "results": [
+        {
+          "id": "createmobgrinding:unfinished_spawner_chunk"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "createmobgrinding:unfinished_spawner_chunk"
+        }
+      ],
+      "results": [
+        {
+          "id": "createmobgrinding:unfinished_spawner_chunk"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "createmobgrinding:unfinished_spawner_chunk"
+  }
+}

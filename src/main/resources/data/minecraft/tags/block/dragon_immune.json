@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "createmobgrinding:rotational_mob_spawner",
+    "createmobgrinding:rotational_mob_grinder"
+  ]
+}

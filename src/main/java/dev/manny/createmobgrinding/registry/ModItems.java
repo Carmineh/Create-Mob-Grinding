@@ -11,6 +11,12 @@ public class ModItems {
 
     public static final Supplier<Item> MOB_SPAWNER_CHUNK = ITEMS.register("mob_spawner_chunk", 
         () -> new dev.manny.createmobgrinding.item.MobSpawnerChunkItem(new Item.Properties()));
+
+    public static final Supplier<Item> BLANK_SPAWNER_CHUNK = ITEMS.register("blank_spawner_chunk", 
+        () -> new Item(new Item.Properties()));
+
+    public static final Supplier<Item> UNFINISHED_SPAWNER_CHUNK = ITEMS.register("unfinished_spawner_chunk", 
+        () -> new dev.manny.createmobgrinding.item.MobSpawnerChunkItem(new Item.Properties()));
         
     public static final Supplier<Item> ROTATIONAL_MOB_SPAWNER = ITEMS.register("rotational_mob_spawner",
         () -> new net.minecraft.world.item.BlockItem(ModBlocks.ROTATIONAL_MOB_SPAWNER.get(), new Item.Properties()));

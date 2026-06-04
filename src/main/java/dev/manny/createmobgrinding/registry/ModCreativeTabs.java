@@ -18,6 +18,7 @@ public class ModCreativeTabs {
                     .title(Component.translatable("itemGroup.createmobgrinding.kinetic_spawning_tab"))
                     .icon(() -> new ItemStack(ModItems.MOB_SPAWNER_CHUNK.get()))
                     .displayItems((parameters, output) -> {
+                        output.accept(ModItems.BLANK_SPAWNER_CHUNK.get());
                         output.accept(ModItems.MOB_SPAWNER_CHUNK.get());
                         output.accept(ModItems.ROTATIONAL_MOB_SPAWNER.get());
                         output.accept(ModItems.ROTATIONAL_MOB_GRINDER.get());

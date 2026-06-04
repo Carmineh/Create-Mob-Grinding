@@ -14,7 +14,7 @@ public class ModBlocks {
                 net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
                         .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                         .requiresCorrectToolForDrops()
-                        .strength(3.0F, 6.0F)
+                        .strength(3.0F, 1200.0F)
                         .noOcclusion()
         )
     );
@@ -24,7 +24,7 @@ public class ModBlocks {
                 net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
                         .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                         .requiresCorrectToolForDrops()
-                        .strength(3.0F, 6.0F)
+                        .strength(3.0F, 1200.0F)
                         .noOcclusion()
         )
     );
