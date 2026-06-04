@@ -30,17 +30,7 @@ Please open an issue in the **[Issues Tab](../../issues)**.
 
 ---
 
-## Supported Languages 🌍
+## Supported Languages
+🇮🇹 🇺🇸 
 
-Create: Mob Grinding is currently translated into the following languages:
-- 🇺🇸 **English** (`en_us`)
-- 🇮🇹 **Italian** (`it_it`)
-
-## Contributing & Adding a New Language
-
-We welcome contributions from the community! If you'd like to translate the mod into your native language:
-1. **Fork** this repository.
-2. Navigate to the language folder: `src/main/resources/assets/createmobgrinding/lang/`.
-3. Copy the base `en_us.json` file and rename it to your language code (e.g., `es_es.json` for Spanish, `fr_fr.json` for French).
-4. Translate all the English text values (on the right side of the `:`) into your language.
-5. Open a **Pull Request (PR)** to this repository with your new translation file. We'll gladly review and merge it!
+If you want to help with translations you can find the files in: `src/main/resources/assets/createmobgrinding/lang/`, copy the base `en_us.json` file and rename it to your language code (e.g., `es_es.json` for Spanish, `fr_fr.json` for French).
