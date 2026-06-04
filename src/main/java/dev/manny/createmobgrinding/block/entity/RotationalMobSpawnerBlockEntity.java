@@ -172,6 +172,12 @@ public class RotationalMobSpawnerBlockEntity extends KineticBlockEntity {
         } else {
             ResourceLocation entityLoc = chunk.get(dev.manny.createmobgrinding.registry.ModDataComponents.SPAWNER_ENTITY.get());
             if (entityLoc != null) {
+                java.util.List<? extends String> blacklist = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBlacklist.get();
+                if (blacklist.contains(entityLoc.toString())) {
+                    tooltip.add(Component.literal("    ").append(Component.literal("Entity: BLACKLISTED").withStyle(net.minecraft.ChatFormatting.DARK_RED, net.minecraft.ChatFormatting.BOLD)));
+                    return true;
+                }
+
                 tooltip.add(Component.literal("    ").append(Component.translatable("tooltip.createmobgrinding.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityLoc)))).withStyle(net.minecraft.ChatFormatting.GRAY));
                 double threshold = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBaseProgress.get() * getTier();
                 int percentage = (int) ((spawnProgress / threshold) * 100);

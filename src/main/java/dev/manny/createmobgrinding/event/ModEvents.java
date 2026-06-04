@@ -22,6 +22,11 @@ import java.util.Optional;
 public class ModEvents {
 
     @SubscribeEvent
+    public static void onCommandsRegister(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        dev.manny.createmobgrinding.command.ModCommands.register(event.getDispatcher(), event.getBuildContext());
+    }
+
+    @SubscribeEvent
     public static void onLivingDrops(LivingDropsEvent event) {
         if (event.getSource().getEntity() instanceof Player player) {
             ItemStack weapon = player.getMainHandItem();

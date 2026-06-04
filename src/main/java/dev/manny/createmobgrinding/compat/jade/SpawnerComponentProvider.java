@@ -26,8 +26,12 @@ public enum SpawnerComponentProvider implements IBlockComponentProvider, IServer
                 tooltip.add(Component.translatable("jade.createmobgrinding.spawner.progress", (int) ((spawnProgress / Math.max(1, max)) * 100)));
             }
             if (serverData.contains("SpawnerEntity")) {
-                ResourceLocation entityId = ResourceLocation.parse(serverData.getString("SpawnerEntity"));
-                tooltip.add(Component.translatable("tooltip.createmobgrinding.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityId))).withStyle(net.minecraft.ChatFormatting.GRAY));
+                if (serverData.getBoolean("Blacklisted")) {
+                    tooltip.add(Component.literal("Entity: BLACKLISTED").withStyle(net.minecraft.ChatFormatting.DARK_RED, net.minecraft.ChatFormatting.BOLD));
+                } else {
+                    ResourceLocation entityId = ResourceLocation.parse(serverData.getString("SpawnerEntity"));
+                    tooltip.add(Component.translatable("tooltip.createmobgrinding.mob_chunk.entity_type", Component.translatable(net.minecraft.Util.makeDescriptionId("entity", entityId))).withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
             }
         }
     }
@@ -42,6 +46,10 @@ public enum SpawnerComponentProvider implements IBlockComponentProvider, IServer
                 ResourceLocation entityId = chunk.get(ModDataComponents.SPAWNER_ENTITY.get());
                 if (entityId != null) {
                     tag.putString("SpawnerEntity", entityId.toString());
+                    java.util.List<? extends String> blacklist = dev.manny.createmobgrinding.config.ModConfigs.COMMON.spawnerBlacklist.get();
+                    if (blacklist.contains(entityId.toString())) {
+                        tag.putBoolean("Blacklisted", true);
+                    }
                 }
             }
         }
